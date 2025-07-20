@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, Receipt, Shield, Archive, Trash2, Eye } from 'lucide-react';
-import emailjs from '@emailjs/browser'; // Add EmailJS library
+
 
 const EReceiptApp = () => {
   const [receiptData, setReceiptData] = useState({
