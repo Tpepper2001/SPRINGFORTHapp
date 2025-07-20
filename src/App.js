@@ -51,8 +51,10 @@ useEffect(() => { const words = receiptData.amountNumbers ? numberToWords(receip
 
 const handleInputChange = (field, value) => { setReceiptData(prev => ({ ...prev, [field]: value })); };
 
-const generateReceiptNumber = () => { const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); handleInputChange('receiptNumber', SF${randomNum}); };
-
+const generateReceiptNumber = () => {
+  const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  handleInputChange('receiptNumber', `SF${randomNum}`);
+};
 const generateSecurityCode = () => { const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let result = ''; for (let i = 0; i < 8; i++) { result += chars.charAt(Math.floor(Math.random() * chars.length)); } return result; };
 
 const downloadReceipt = () => { if (!receiptData.receiptNumber || !receiptData.receivedFrom || !receiptData.amountNumbers) { alert('Please fill in Receipt Number, Received From, and Amount fields'); return; }
