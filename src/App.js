@@ -90,8 +90,27 @@ doc.save(`SPRINGFORTH-RECEIPT-${receiptData.receiptNumber}.pdf`);
 
 };
 
-const downloadReceiptAsImage = () => { const canvas = document.createElement('canvas'); canvas.width = 360; canvas.height = 650; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#000'; ctx.font = '14px Arial'; ctx.fillText(Receipt: ${receiptData.receiptNumber}, 20, 50); ctx.fillText(Received From: ${receiptData.receivedFrom}, 20, 70); ctx.fillText(Amount: ₦${formatAmount(receiptData.amountNumbers)}, 20, 90); ctx.fillText(In Words: ${receiptData.amountWords}, 20, 110); const link = document.createElement('a'); link.download = SPRINGFORTH-RECEIPT-${receiptData.receiptNumber}.png; link.href = canvas.toDataURL(); link.click(); };
+const downloadReceiptAsImage = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 650;
+  const ctx = canvas.getContext('2d');
 
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#000';
+  ctx.font = '14px Arial';
+  ctx.fillText(`Receipt: ${receiptData.receiptNumber}`, 20, 50);
+  ctx.fillText(`Received From: ${receiptData.receivedFrom}`, 20, 70);
+  ctx.fillText(`Amount: ₦${formatAmount(receiptData.amountNumbers)}`, 20, 90);
+  ctx.fillText(`In Words: ${receiptData.amountWords}`, 20, 110);
+
+  const link = document.createElement('a');
+  link.download = `SPRINGFORTH-RECEIPT-${receiptData.receiptNumber}.png`;
+  link.href = canvas.toDataURL();
+  link.click();
+};
 const shareReceiptOptions = () => { const message = Springforth Academy Receipt\nReceipt No: ${receiptData.receiptNumber}\nDate: ${receiptData.date}\nFrom: ${receiptData.receivedFrom}\nAmount: ₦${formatAmount(receiptData.amountNumbers)}\nPayment For: ${receiptData.paymentFor || 'Payment received'}; const encoded = encodeURIComponent(message);
 
 if (navigator.share) {
