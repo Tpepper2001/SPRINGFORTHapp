@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Share, Receipt, Plus, Upload, Eye, FileText } from 'lucide-react';
+import { Download, Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
 const App = () => {
   const [receiptData, setReceiptData] = useState({
@@ -8,6 +8,7 @@ const App = () => {
     receivedFrom: '',
     amountNumbers: '',
     amountWords: '',
+    balanceRemaining: '',
     description: '',
     paymentMethod: 'Cash',
     paymentFor: '',
@@ -128,7 +129,7 @@ const App = () => {
     try {
       const canvas = document.createElement('canvas');
       canvas.width = 600;
-      canvas.height = 400;
+      canvas.height = 450; // Increased height to accommodate new field
       const ctx = canvas.getContext('2d');
 
       // White background
@@ -142,7 +143,7 @@ const App = () => {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, 80);
 
-      // Company logo area (left side)
+      // Company logo area
       ctx.fillStyle = '#fff';
       ctx.beginPath();
       ctx.arc(60, 40, 25, 0, 2 * Math.PI);
@@ -163,7 +164,7 @@ const App = () => {
       ctx.fillText('Barnawa Narayi, Sabon Gari, Kaduna East, Kaduna', 100, 62);
       ctx.fillText('CRÈCHE, DAYCARE, PLAYGROUP, NURSERY, PRIMARY, LESSON + TUTORIALS', 100, 74);
 
-      // Receipt number (top right)
+      // Receipt number
       ctx.font = '12px Arial';
       ctx.textAlign = 'right';
       ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width - 20, 25);
@@ -186,7 +187,7 @@ const App = () => {
       const lineHeight = 25;
       const leftMargin = 30;
       
-      // Date field (only one, on the left)
+      // Date
       ctx.fillText('Date:', leftMargin, y);
       ctx.fillText(new Date(receiptData.date).toLocaleDateString('en-GB'), leftMargin + 50, y);
       
@@ -216,7 +217,19 @@ const App = () => {
         ctx.fillText(`₦${formatAmount(receiptData.amountNumbers)}`, leftMargin + 95, y - 2);
       }
       
-      y += lineHeight * 2;
+      y += lineHeight;
+      
+      // Balance Remaining
+      ctx.fillText('Balance Remaining:', leftMargin, y);
+      ctx.beginPath();
+      ctx.moveTo(leftMargin + 120, y + 2);
+      ctx.lineTo(canvas.width - 30, y + 2);
+      ctx.stroke();
+      if (receiptData.balanceRemaining) {
+        ctx.fillText(`₦${formatAmount(receiptData.balanceRemaining)}`, leftMargin + 125, y - 2);
+      }
+      
+      y += lineHeight;
       
       // Being (description)
       ctx.fillText('Being:', leftMargin, y);
@@ -261,7 +274,7 @@ const App = () => {
       
       y += 10;
       
-      // Draft/Cheque No (only show if filled)
+      // Draft/Cheque No
       if (receiptData.draftChequeNo) {
         ctx.fillText('Draft/Cheque No:', leftMargin, y);
         ctx.beginPath();
@@ -284,7 +297,7 @@ const App = () => {
       ctx.fillText(':', leftMargin + 20, y + 23);
       ctx.fillText('K', leftMargin + 25, y + 23);
       
-      // For Springforth Academy (signature area)
+      // For Springforth Academy
       ctx.textAlign = 'right';
       ctx.font = 'italic 14px Arial';
       ctx.fillText('For Springforth Academy', canvas.width - 30, y + 25);
@@ -312,7 +325,6 @@ const App = () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
 
-    // Open the receipt image in a new browser tab
     const newWindow = window.open();
     newWindow.document.write(`
       <!DOCTYPE html>
@@ -400,7 +412,6 @@ const App = () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
 
-    // Create a simple HTML document for PDF generation
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -465,6 +476,10 @@ const App = () => {
                 <span>₦${formatAmount(receiptData.amountNumbers)}</span>
               </div>
               <div class="detail-row">
+                <span class="label">Balance Remaining:</span>
+                <span>${receiptData.balanceRemaining ? '₦' + formatAmount(receiptData.balanceRemaining) : 'N/A'}</span>
+              </div>
+              <div class="detail-row">
                 <span class="label">Payment For:</span>
                 <span>${receiptData.paymentFor || 'N/A'}</span>
               </div>
@@ -488,16 +503,12 @@ const App = () => {
       </html>
     `;
 
-    // Create a new window for PDF generation
     const newWindow = window.open();
     newWindow.document.write(htmlContent);
     newWindow.document.close();
     
-    // Wait a moment for the image to load, then trigger print dialog
     setTimeout(() => {
       newWindow.print();
-      
-      // Optional: Close the window after printing (user can cancel this)
       newWindow.onafterprint = () => {
         setTimeout(() => {
           if (confirm('Receipt printed successfully! Close this window?')) {
@@ -517,15 +528,14 @@ const App = () => {
 Receipt No: ${receiptData.receiptNumber}
 Date: ${new Date(receiptData.date).toLocaleDateString('en-GB')}
 Amount: ₦${formatAmount(receiptData.amountNumbers)}
+Balance Remaining: ${receiptData.balanceRemaining ? '₦' + formatAmount(receiptData.balanceRemaining) : 'N/A'}
 Received From: ${receiptData.receivedFrom}
 Payment For: ${receiptData.paymentFor || receiptData.description}
 
 Thank you for your payment!`;
 
-    // Try to share image directly using the Web Share API
     if (navigator.share) {
       try {
-        // Convert canvas to blob
         const response = await fetch(imageUrl);
         const blob = await response.blob();
         const file = new File([blob], `Springforth-Receipt-${receiptData.receiptNumber}.png`, { 
@@ -543,13 +553,11 @@ Thank you for your payment!`;
       }
     }
 
-    // Create a temporary link to download the image first
     const link = document.createElement('a');
     link.download = `Springforth-Receipt-${receiptData.receiptNumber}.png`;
     link.href = imageUrl;
     link.click();
 
-    // Then open WhatsApp with the text
     setTimeout(() => {
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + '\n\nReceipt image downloaded to your device - please attach it manually.')}`;
       window.open(whatsappUrl, '_blank');
@@ -643,6 +651,23 @@ Thank you for your payment!`;
                       name="amountNumbers"
                       value={receiptData.amountNumbers}
                       onChange={handleAmountChange}
+                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors bg-white hover:border-gray-400"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Balance Remaining
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">₦</span>
+                    <input
+                      type="text"
+                      name="balanceRemaining"
+                      value={receiptData.balanceRemaining}
+                      onChange={handleInputChange}
                       className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors bg-white hover:border-gray-400"
                       placeholder="0.00"
                     />
