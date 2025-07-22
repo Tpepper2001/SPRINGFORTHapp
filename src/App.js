@@ -24,11 +24,14 @@ const App = () => {
     setReceiptData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Modified formatAmount to return Naira and Kobo separately
   const formatAmount = (num) => {
-    if (!num || isNaN(num)) return '0.00';
+    if (!num || isNaN(num)) return { naira: '0', kobo: '00' };
     const cleanNum = parseFloat(num.toString().replace(/,/g, ''));
-    if (isNaN(cleanNum)) return '0.00';
-    return cleanNum.toLocaleString('en-NG', { minimumFractionDigits: 2 });
+    if (isNaN(cleanNum)) return { naira: '0', kobo: '00' };
+    const naira = Math.floor(cleanNum).toLocaleString('en-NG');
+    const kobo = Math.round((cleanNum - Math.floor(cleanNum)) * 100).toString().padStart(2, '0');
+    return { naira, kobo };
   };
 
   const numberToWords = (amount) => {
@@ -91,7 +94,6 @@ const App = () => {
       result += ' and ' + convertHundreds(kobo) + 'Kobo';
     }
     result += ' Only';
-    
     return result.replace(/\s+/g, ' ').trim();
   };
 
@@ -102,6 +104,7 @@ const App = () => {
         ...prev,
         amountNumbers: value,
         amountWords: value ? numberToWords(value) : ''
+ Huntington Beach
       }));
     } catch (error) {
       console.error('Error converting amount:', error);
@@ -127,21 +130,26 @@ const App = () => {
     setIsGenerating(true);
     
     try {
+      // Increase canvas size for higher resolution (e.g., 2x for better quality)
       const canvas = document.createElement('canvas');
-      canvas.width = 600;
-      canvas.height = 450; // Increased height to accommodate new field
+      const scale = 2; // Scaling factor for higher DPI
+      canvas.width = 600 * scale;
+      canvas.height = 450 * scale; // Adjust height as needed
       const ctx = canvas.getContext('2d');
+
+      // Scale the context to handle higher resolution
+      ctx.scale(scale, scale);
 
       // White background
       ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
 
       // Purple header section
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width / scale, 0);
       gradient.addColorStop(0, '#8B5A96');
       gradient.addColorStop(1, '#A569BD');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, 80);
+      ctx.fillRect(0, 0, canvas.width / scale, 80);
 
       // Company logo area
       ctx.fillStyle = '#fff';
@@ -167,8 +175,8 @@ const App = () => {
       // Receipt number
       ctx.font = '12px Arial';
       ctx.textAlign = 'right';
-      ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width - 20, 25);
-      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas.width - 20, 45);
+      ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 25);
+      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 45);
 
       // Official Receipt banner
       ctx.fillStyle = '#8B5A96';
@@ -199,7 +207,7 @@ const App = () => {
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(leftMargin + 120, y + 2);
-      ctx.lineTo(canvas.width - 30, y + 2);
+      ctx.lineTo(canvas.width / scale - 30, y + 2);
       ctx.stroke();
       if (receiptData.receivedFrom) {
         ctx.fillText(receiptData.receivedFrom, leftMargin + 125, y - 2);
@@ -211,10 +219,11 @@ const App = () => {
       ctx.fillText('The Sum of:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 90, y + 2);
-      ctx.lineTo(canvas.width - 30, y + 2);
+      ctx.lineTo(canvas.width / scale - 30, y + 2);
       ctx.stroke();
       if (receiptData.amountNumbers) {
-        ctx.fillText(`₦${formatAmount(receiptData.amountNumbers)}`, leftMargin + 95, y - 2);
+        const { naira, kobo } = formatAmount(receiptData.amountNumbers);
+        ctx.fillText(`₦${naira}.${kobo}`, leftMargin + 95, y - 2);
       }
       
       y += lineHeight;
@@ -223,10 +232,11 @@ const App = () => {
       ctx.fillText('Balance Remaining:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 120, y + 2);
-      ctx.lineTo(canvas.width - 30, y + 2);
+      ctx.lineTo(canvas.width / scale - 30, y + 2);
       ctx.stroke();
       if (receiptData.balanceRemaining) {
-        ctx.fillText(`₦${formatAmount(receiptData.balanceRemaining)}`, leftMargin + 125, y - 2);
+        const { naira, kobo } = formatAmount(receiptData.balanceRemaining);
+        ctx.fillText(`₦${naira}.${kobo}`, leftMargin + 125, y - 2);
       }
       
       y += lineHeight;
@@ -235,7 +245,7 @@ const App = () => {
       ctx.fillText('Being:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 60, y + 2);
-      ctx.lineTo(canvas.width - 30, y + 2);
+      ctx.lineTo(canvas.width / scale - 30, y + 2);
       ctx.stroke();
       if (receiptData.paymentFor) {
         ctx.fillText(receiptData.paymentFor, leftMargin + 65, y - 2);
@@ -245,7 +255,7 @@ const App = () => {
       
       // Amount in words
       const words = receiptData.amountWords;
-      const maxWidth = canvas.width - 60;
+      const maxWidth = canvas.width / scale - 60;
       const wordsLines = [];
       let currentLine = '';
       
@@ -266,7 +276,7 @@ const App = () => {
       wordsLines.forEach((line, index) => {
         ctx.beginPath();
         ctx.moveTo(leftMargin, y + 2);
-        ctx.lineTo(canvas.width - 30, y + 2);
+        ctx.lineTo(canvas.width / scale - 30, y + 2);
         ctx.stroke();
         ctx.fillText(line, leftMargin, y - 2);
         y += lineHeight;
@@ -291,23 +301,25 @@ const App = () => {
       ctx.font = 'bold 12px Arial';
       ctx.fillText('No Refund of Money after Payment', leftMargin, y);
       
-      // N : K box
-      ctx.strokeRect(leftMargin, y + 10, 40, 20);
-      ctx.fillText('N', leftMargin + 10, y + 23);
-      ctx.fillText(':', leftMargin + 20, y + 23);
-      ctx.fillText('K', leftMargin + 25, y + 23);
+      // N:K box with Naira and Kobo values
+      ctx.strokeRect(leftMargin, y + 10, 60, 20); // Increased width for better spacing
+      const amount = formatAmount(receiptData.amountNumbers);
+      ctx.fillText(amount.naira, leftMargin + 10, y + 23);
+      ctx.fillText(':', leftMargin + 30, y + 23);
+      ctx.fillText(amount.kobo, leftMargin + 40, y + 23);
       
       // For Springforth Academy
       ctx.textAlign = 'right';
       ctx.font = 'italic 14px Arial';
-      ctx.fillText('For Springforth Academy', canvas.width - 30, y + 25);
+      ctx.fillText('For Springforth Academy', canvas.width / scale - 30, y + 25);
       
       // Signature line
       ctx.beginPath();
-      ctx.moveTo(canvas.width - 200, y + 35);
-      ctx.lineTo(canvas.width - 30, y + 35);
+      ctx.moveTo(canvas.width / scale - 200, y + 35);
+      ctx.lineTo(canvas.width / scale - 30, y + 35);
       ctx.stroke();
 
+      // Generate high-quality PNG
       const dataUrl = canvas.toDataURL('image/png', 1.0);
       setGeneratedImageUrl(dataUrl);
       return dataUrl;
@@ -321,6 +333,7 @@ const App = () => {
     }
   };
 
+  // Update viewReceipt to ensure high-quality image display
   const viewReceipt = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
@@ -354,6 +367,7 @@ const App = () => {
               height: auto;
               border: 1px solid #ddd;
               border-radius: 5px;
+              image-rendering: optimizeQuality; /* Ensure high-quality rendering */
             }
             .actions {
               margin-top: 20px;
@@ -381,6 +395,7 @@ const App = () => {
               body { background: white; }
               .actions { display: none; }
               .container { box-shadow: none; }
+              img { max-width: 100%; image-rendering: optimizeQuality; }
             }
           </style>
         </head>
@@ -408,9 +423,13 @@ const App = () => {
     newWindow.document.close();
   };
 
+  // Update generatePDF to include N:K format in details
   const generatePDF = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
+
+    const amount = formatAmount(receiptData.amountNumbers);
+    const balance = formatAmount(receiptData.balanceRemaining);
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -433,6 +452,7 @@ const App = () => {
               max-width: 100%;
               height: auto;
               border: 1px solid #ddd;
+              image-rendering: optimizeQuality;
             }
             .receipt-details {
               margin-top: 20px;
@@ -473,11 +493,11 @@ const App = () => {
               </div>
               <div class="detail-row">
                 <span class="label">Amount:</span>
-                <span>₦${formatAmount(receiptData.amountNumbers)}</span>
+                <span>₦${amount.naira}.${amount.kobo}</span>
               </div>
               <div class="detail-row">
                 <span class="label">Balance Remaining:</span>
-                <span>${receiptData.balanceRemaining ? '₦' + formatAmount(receiptData.balanceRemaining) : 'N/A'}</span>
+                <span>${receiptData.balanceRemaining ? `₦${balance.naira}.${balance.kobo}` : 'N/A'}</span>
               </div>
               <div class="detail-row">
                 <span class="label">Payment For:</span>
@@ -519,16 +539,20 @@ const App = () => {
     }, 1000);
   };
 
+  // Update shareViaWhatsApp to include N:K format
   const shareViaWhatsApp = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
+
+    const amount = formatAmount(receiptData.amountNumbers);
+    const balance = formatAmount(receiptData.balanceRemaining);
 
     const shareText = `🧾 SPRINGFORTH ACADEMY RECEIPT
       
 Receipt No: ${receiptData.receiptNumber}
 Date: ${new Date(receiptData.date).toLocaleDateString('en-GB')}
-Amount: ₦${formatAmount(receiptData.amountNumbers)}
-Balance Remaining: ${receiptData.balanceRemaining ? '₦' + formatAmount(receiptData.balanceRemaining) : 'N/A'}
+Amount: ₦${amount.naira}.${amount.kobo}
+Balance Remaining: ${receiptData.balanceRemaining ? `₦${balance.naira}.${balance.kobo}` : 'N/A'}
 Received From: ${receiptData.receivedFrom}
 Payment For: ${receiptData.paymentFor || receiptData.description}
 
@@ -570,11 +594,11 @@ Thank you for your payment!`;
 
   const isFormValid = receiptData.receivedFrom && receiptData.amountNumbers && receiptData.receiptNumber;
 
+  // The JSX remains largely unchanged, but ensure the input for amountNumbers allows decimal input
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Form Section */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-6">
               <div className="flex items-center justify-center space-x-3">
@@ -585,7 +609,6 @@ Thank you for your payment!`;
             </div>
 
             <div className="p-8">
-              {/* Receipt Number Generator */}
               <div className="bg-purple-50 rounded-lg p-4 mb-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -611,7 +634,6 @@ Thank you for your payment!`;
                 </div>
               </div>
 
-              {/* Form Fields */}
               <div className="grid gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -647,7 +669,8 @@ Thank you for your payment!`;
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">₦</span>
                     <input
-                      type="text"
+                      type="number" // Changed to number input for decimal support
+                      step="0.01" // Allow two decimal places
                       name="amountNumbers"
                       value={receiptData.amountNumbers}
                       onChange={handleAmountChange}
@@ -664,7 +687,8 @@ Thank you for your payment!`;
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">₦</span>
                     <input
-                      type="text"
+                      type="number"
+                      step="0.01"
                       name="balanceRemaining"
                       value={receiptData.balanceRemaining}
                       onChange={handleInputChange}
@@ -749,7 +773,6 @@ Thank you for your payment!`;
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="mt-8 space-y-4">
                 <button
                   onClick={generateAndPreview}
@@ -801,7 +824,6 @@ Thank you for your payment!`;
             </div>
           </div>
 
-          {/* Preview Section */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-6">
               <h2 className="text-xl font-bold text-white text-center">Receipt Preview</h2>
@@ -813,6 +835,7 @@ Thank you for your payment!`;
                     src={generatedImageUrl}
                     alt="Receipt Preview"
                     className="max-w-full h-auto border border-gray-300 rounded-lg shadow-md"
+                    style={{ imageRendering: 'optimizeQuality' }} // Ensure high-quality rendering
                   />
                   <p className="mt-4 text-sm text-gray-600 italic">
                     Preview of the generated receipt
