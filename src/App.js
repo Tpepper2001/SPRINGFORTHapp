@@ -104,7 +104,6 @@ const App = () => {
         ...prev,
         amountNumbers: value,
         amountWords: value ? numberToWords(value) : ''
- Huntington Beach
       }));
     } catch (error) {
       console.error('Error converting amount:', error);
