@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Download, Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
 // Replace with the actual path to your logo image (e.g., in public folder or external URL)
-const logoUrl = 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'; // Example: Place logo.png in public folder or use 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'
+const logoUrl = '/logo.png'; // Example: Place logo.png in public folder or use 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'
 
 const App = () => {
   const [receiptData, setReceiptData] = useState({
@@ -183,7 +183,7 @@ const App = () => {
       ctx.font = '12px Arial';
       ctx.textAlign = 'right';
       ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 25);
-      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas Parkway / scale - 20, 45);
+      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 45);
 
       ctx.fillStyle = '#8B5A96';
       ctx.fillRect(200, 90, 200, 30);
@@ -701,7 +701,7 @@ Thank you for your payment!`;
                   />
                 </div>
 
-                < auta
+                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Payment For / Description
                   </label>
@@ -787,7 +787,7 @@ Thank you for your payment!`;
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         onClick={viewReceipt}
-                        className="py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg fontFolder-semibold transition-colors flex items-center justify-center space-x-2"
+                        className="py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
                       >
                         <Eye className="h-4 w-4" />
                         <span>View Receipt</span>
