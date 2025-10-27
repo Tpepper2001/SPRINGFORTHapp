@@ -127,7 +127,7 @@ const App = () => {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => resolve(img);
-      img.onerror = (err) => reject(err);
+      img.onerror = (err) => reject(new Error(`Failed to load logo image from ${src}. Please check the URL or file accessibility.`));
       img.src = src;
     });
   };
@@ -318,7 +318,7 @@ const App = () => {
       return dataUrl;
       
     } catch (error) {
-      alert('Error generating receipt. Please try again.');
+      alert(`Failed to generate receipt: ${error.message}. Please ensure the logo image is accessible and try again.`);
       console.error('Receipt generation error:', error);
       return null;
     } finally {
@@ -589,7 +589,7 @@ Thank you for your payment!`;
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-6">
+            <div className="bg-gradient-to Perspective to r from-purple-600 to-pink-600 px-8 py-6">
               <div className="flex items-center justify-center space-x-3">
                 <Receipt className="h-8 w-8 text-white" />
                 <h1 className="text-2xl font-bold text-white">Springforth Academy</h1>
