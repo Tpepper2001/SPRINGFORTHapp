@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Download, Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
+// Replace with the actual path to your logo image (e.g., in public folder or external URL)
+const logoUrl = '/logo.png'; // Example: Place logo.png in public folder or use a URL like 'https://example.com/logo.png'
+
 const App = () => {
   const [receiptData, setReceiptData] = useState({
     receiptNumber: '',
@@ -24,7 +27,6 @@ const App = () => {
     setReceiptData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Modified formatAmount to return Naira and Kobo separately
   const formatAmount = (num) => {
     if (!num || isNaN(num)) return { naira: '0', kobo: '00' };
     const cleanNum = parseFloat(num.toString().replace(/,/g, ''));
@@ -120,28 +122,47 @@ const App = () => {
     setReceiptData((prev) => ({ ...prev, receiptNumber: randomNum }));
   };
 
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous'; // Handle CORS if logo is from an external URL
+      img.onload = () => resolve(img);
+      img.onerror = (err) => reject(err);
+      img.src = src;
+    });
+  };
+
   const generateReceiptImage = async () => {
     if (!receiptData.receivedFrom || !receiptData.amountNumbers) {
       alert('Please fill in required fields: Received From and Amount');
-      return;
+      return null;
     }
 
     setIsGenerating(true);
     
     try {
-      // Increase canvas size for higher resolution (e.g., 2x for better quality)
       const canvas = document.createElement('canvas');
-      const scale = 2; // Scaling factor for higher DPI
+      const scale = 2; // Scaling factor for high DPI
       canvas.width = 600 * scale;
-      canvas.height = 450 * scale; // Adjust height as needed
+      canvas.height = 450 * scale;
       const ctx = canvas.getContext('2d');
 
-      // Scale the context to handle higher resolution
       ctx.scale(scale, scale);
 
       // White background
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
+
+      // Load logo image
+      const logo = await loadImage(logoUrl);
+
+      // Draw watermark (semi-transparent logo in the center)
+      ctx.globalAlpha = 0.1; // Set low opacity for watermark
+      const watermarkSize = 300; // Adjust size as needed
+      const watermarkX = (canvas.width / scale - watermarkSize) / 2;
+      const watermarkY = (canvas.height / scale - watermarkSize) / 2;
+      ctx.drawImage(logo, watermarkX, watermarkY, watermarkSize, watermarkSize);
+      ctx.globalAlpha = 1.0; // Reset opacity
 
       // Purple header section
       const gradient = ctx.createLinearGradient(0, 0, canvas.width / scale, 0);
@@ -150,26 +171,20 @@ const App = () => {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width / scale, 80);
 
-      // Company logo area
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.arc(60, 40, 25, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = '#8B5A96';
-      ctx.font = 'bold 12px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('SA', 60, 45);
+      // Draw logo in header (top-left corner)
+      const logoSize = 50; // Adjust size as needed
+      ctx.drawImage(logo, 20, 15, logoSize, logoSize);
 
-      // Company name and details
+      // Company name and details (adjusted to accommodate logo)
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 28px Arial';
       ctx.textAlign = 'left';
-      ctx.fillText('SPRINGFORTH ACADEMY', 100, 35);
+      ctx.fillText('SPRINGFORTH ACADEMY', 80, 35); // Shifted right to avoid logo overlap
       
       ctx.font = '10px Arial';
-      ctx.fillText('No. 15 Tony Ogomienwe Close, off Living water Avenue,', 100, 50);
-      ctx.fillText('Barnawa Narayi, Sabon Gari, Kaduna East, Kaduna', 100, 62);
-      ctx.fillText('CRÈCHE, DAYCARE, PLAYGROUP, NURSERY, PRIMARY, LESSON + TUTORIALS', 100, 74);
+      ctx.fillText('No. 15 Tony Ogomienwe Close, off Living water Avenue,', 80, 50);
+      ctx.fillText('Barnawa Narayi, Sabon Gari, Kaduna East, Kaduna', 80, 62);
+      ctx.fillText('CRÈCHE, DAYCARE, PLAYGROUP, NURSERY, PRIMARY, LESSON + TUTORIALS', 80, 74);
 
       // Receipt number
       ctx.font = '12px Arial';
@@ -194,13 +209,11 @@ const App = () => {
       const lineHeight = 25;
       const leftMargin = 30;
       
-      // Date
       ctx.fillText('Date:', leftMargin, y);
       ctx.fillText(new Date(receiptData.date).toLocaleDateString('en-GB'), leftMargin + 50, y);
       
       y += lineHeight;
       
-      // Received From
       ctx.fillText('Received From:', leftMargin, y);
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 0.5;
@@ -214,7 +227,6 @@ const App = () => {
       
       y += lineHeight;
       
-      // The Sum of
       ctx.fillText('The Sum of:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 90, y + 2);
@@ -227,7 +239,6 @@ const App = () => {
       
       y += lineHeight;
       
-      // Balance Remaining
       ctx.fillText('Balance Remaining:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 120, y + 2);
@@ -240,7 +251,6 @@ const App = () => {
       
       y += lineHeight;
       
-      // Being (description)
       ctx.fillText('Being:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 60, y + 2);
@@ -252,7 +262,6 @@ const App = () => {
       
       y += lineHeight * 2;
       
-      // Amount in words
       const words = receiptData.amountWords;
       const maxWidth = canvas.width / scale - 60;
       const wordsLines = [];
@@ -283,7 +292,6 @@ const App = () => {
       
       y += 10;
       
-      // Draft/Cheque No
       if (receiptData.draftChequeNo) {
         ctx.fillText('Draft/Cheque No:', leftMargin, y);
         ctx.beginPath();
@@ -296,29 +304,24 @@ const App = () => {
         y += 10;
       }
       
-      // No Refund notice
       ctx.font = 'bold 12px Arial';
       ctx.fillText('No Refund of Money after Payment', leftMargin, y);
       
-      // N:K box with Naira and Kobo values
-      ctx.strokeRect(leftMargin, y + 10, 60, 20); // Increased width for better spacing
+      ctx.strokeRect(leftMargin, y + 10, 60, 20);
       const amount = formatAmount(receiptData.amountNumbers);
       ctx.fillText(amount.naira, leftMargin + 10, y + 23);
       ctx.fillText(':', leftMargin + 30, y + 23);
       ctx.fillText(amount.kobo, leftMargin + 40, y + 23);
       
-      // For Springforth Academy
       ctx.textAlign = 'right';
       ctx.font = 'italic 14px Arial';
       ctx.fillText('For Springforth Academy', canvas.width / scale - 30, y + 25);
       
-      // Signature line
       ctx.beginPath();
       ctx.moveTo(canvas.width / scale - 200, y + 35);
       ctx.lineTo(canvas.width / scale - 30, y + 35);
       ctx.stroke();
 
-      // Generate high-quality PNG
       const dataUrl = canvas.toDataURL('image/png', 1.0);
       setGeneratedImageUrl(dataUrl);
       return dataUrl;
@@ -332,7 +335,6 @@ const App = () => {
     }
   };
 
-  // Update viewReceipt to ensure high-quality image display
   const viewReceipt = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
@@ -366,7 +368,7 @@ const App = () => {
               height: auto;
               border: 1px solid #ddd;
               border-radius: 5px;
-              image-rendering: optimizeQuality; /* Ensure high-quality rendering */
+              image-rendering: optimizeQuality;
             }
             .actions {
               margin-top: 20px;
@@ -422,7 +424,6 @@ const App = () => {
     newWindow.document.close();
   };
 
-  // Update generatePDF to include N:K format in details
   const generatePDF = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
@@ -538,7 +539,6 @@ const App = () => {
     }, 1000);
   };
 
-  // Update shareViaWhatsApp to include N:K format
   const shareViaWhatsApp = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
     if (!imageUrl) return;
@@ -593,7 +593,6 @@ Thank you for your payment!`;
 
   const isFormValid = receiptData.receivedFrom && receiptData.amountNumbers && receiptData.receiptNumber;
 
-  // The JSX remains largely unchanged, but ensure the input for amountNumbers allows decimal input
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4">
       <div className="max-w-6xl mx-auto">
@@ -668,8 +667,8 @@ Thank you for your payment!`;
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-semibold">₦</span>
                     <input
-                      type="number" // Changed to number input for decimal support
-                      step="0.01" // Allow two decimal places
+                      type="number"
+                      step="0.01"
                       name="amountNumbers"
                       value={receiptData.amountNumbers}
                       onChange={handleAmountChange}
@@ -834,7 +833,7 @@ Thank you for your payment!`;
                     src={generatedImageUrl}
                     alt="Receipt Preview"
                     className="max-w-full h-auto border border-gray-300 rounded-lg shadow-md"
-                    style={{ imageRendering: 'optimizeQuality' }} // Ensure high-quality rendering
+                    style={{ imageRendering: 'optimizeQuality' }}
                   />
                   <p className="mt-4 text-sm text-gray-600 italic">
                     Preview of the generated receipt
