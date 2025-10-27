@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
 // Replace with the actual path to your logo image (e.g., in public folder or external URL)
-const logoUrl = 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'; // Example: Place logo.png in public folder or use 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'
+const logoUrl = '/964771c3-d121-4fd9-8bd0-2bf5fd7bc01c_removalai_preview.png'; // Example: Place logo.png in public folder or use 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'
 
 const App = () => {
   const [receiptData, setReceiptData] = useState({
