@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Download, Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
 // Replace with the actual path to your logo image (e.g., in public folder or external URL)
-const logoUrl = 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'; // Example: Place logo.png in public folder or use a URL like 'https://example.com/logo.png'
+const logoUrl = 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'; // Example: Place logo.png in public folder or use 'https://drive.google.com/uc?export=download&id=123XQSnTeOgz9mgOHO4B7pcVYwqcGpMD1'
 
 const App = () => {
   const [receiptData, setReceiptData] = useState({
@@ -125,7 +125,7 @@ const App = () => {
   const loadImage = (src) => {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'Anonymous'; // Handle CORS if logo is from an external URL
+      img.crossOrigin = 'Anonymous';
       img.onload = () => resolve(img);
       img.onerror = (err) => reject(err);
       img.src = src;
@@ -142,57 +142,49 @@ const App = () => {
     
     try {
       const canvas = document.createElement('canvas');
-      const scale = 2; // Scaling factor for high DPI
+      const scale = 2;
       canvas.width = 600 * scale;
       canvas.height = 450 * scale;
       const ctx = canvas.getContext('2d');
 
       ctx.scale(scale, scale);
 
-      // White background
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
 
-      // Load logo image
       const logo = await loadImage(logoUrl);
 
-      // Draw watermark (semi-transparent logo in the center)
-      ctx.globalAlpha = 0.1; // Set low opacity for watermark
-      const watermarkSize = 300; // Adjust size as needed
+      ctx.globalAlpha = 0.1;
+      const watermarkSize = 300;
       const watermarkX = (canvas.width / scale - watermarkSize) / 2;
       const watermarkY = (canvas.height / scale - watermarkSize) / 2;
       ctx.drawImage(logo, watermarkX, watermarkY, watermarkSize, watermarkSize);
-      ctx.globalAlpha = 1.0; // Reset opacity
+      ctx.globalAlpha = 1.0;
 
-      // Purple header section
       const gradient = ctx.createLinearGradient(0, 0, canvas.width / scale, 0);
       gradient.addColorStop(0, '#8B5A96');
       gradient.addColorStop(1, '#A569BD');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width / scale, 80);
 
-      // Draw logo in header (top-left corner)
-      const logoSize = 50; // Adjust size as needed
+      const logoSize = 50;
       ctx.drawImage(logo, 20, 15, logoSize, logoSize);
 
-      // Company name and details (adjusted to accommodate logo)
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 28px Arial';
       ctx.textAlign = 'left';
-      ctx.fillText('SPRINGFORTH ACADEMY', 80, 35); // Shifted right to avoid logo overlap
+      ctx.fillText('SPRINGFORTH ACADEMY', 80, 35);
       
       ctx.font = '10px Arial';
       ctx.fillText('No. 15 Tony Ogomienwe Close, off Living water Avenue,', 80, 50);
       ctx.fillText('Barnawa Narayi, Sabon Gari, Kaduna East, Kaduna', 80, 62);
       ctx.fillText('CRÈCHE, DAYCARE, PLAYGROUP, NURSERY, PRIMARY, LESSON + TUTORIALS', 80, 74);
 
-      // Receipt number
       ctx.font = '12px Arial';
       ctx.textAlign = 'right';
       ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 25);
-      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 45);
+      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas Parkway / scale - 20, 45);
 
-      // Official Receipt banner
       ctx.fillStyle = '#8B5A96';
       ctx.fillRect(200, 90, 200, 30);
       ctx.fillStyle = '#fff';
@@ -200,7 +192,6 @@ const App = () => {
       ctx.textAlign = 'center';
       ctx.fillText('OFFICIAL RECEIPT', 300, 110);
 
-      // Form fields
       ctx.fillStyle = '#000';
       ctx.font = '14px Serif';
       ctx.textAlign = 'left';
@@ -531,7 +522,7 @@ const App = () => {
       newWindow.print();
       newWindow.onafterprint = () => {
         setTimeout(() => {
-          if (confirm('Receipt printed successfully! Close this window?')) {
+          if (window.confirm('Receipt printed successfully! Close this window?')) {
             newWindow.close();
           }
         }, 1000);
@@ -710,7 +701,7 @@ Thank you for your payment!`;
                   />
                 </div>
 
-                <div>
+                < auta
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Payment For / Description
                   </label>
@@ -796,7 +787,7 @@ Thank you for your payment!`;
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         onClick={viewReceipt}
-                        className="py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                        className="py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg fontFolder-semibold transition-colors flex items-center justify-center space-x-2"
                       >
                         <Eye className="h-4 w-4" />
                         <span>View Receipt</span>
