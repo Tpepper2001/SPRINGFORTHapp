@@ -3,7 +3,7 @@ import { Share, Receipt, Plus, Eye, FileText } from 'lucide-react';
 
 // ✅ Embedded Springforth Academy Logo (Base64, lightweight version)
 const logoUrl =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAABHNCSVQICAgIfAhkiAAABZpJREFUeJzt3UFy4zAQBVDJZV+v7eSdnSKrCHQL5dpxHq9mB+0SBFiRPHfnoDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgP5OT2+3cQvze+8Ff2Py3m8LeHbfUvA/5Wn14fYNc4sK5jEv5bL/CX5h/v9HZz1EPOW/H3D3AGuS6L+W7v13zz9fFzD3iPteY7Yz3vCGcvWbZLj/k7xjJzj5XrXlL9rPv/r8JP8e9d0X3fZ78x+z8qV9pS4xq1j7MXMc89Z+Ezkq5f6ozjGgL/eB73j15xQ96+WZ/gNcb1Psl69rcZ3Z4T9lrPP1T/A/zL3sP5cvz3c5+P8vne4zQ/yD3ffGfHPW6t/8+Z3fYxv3eNH2rj/rf1b7fxAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAnP2zZZJdL5FQAAAAASUVORK5CYII=";
+  "https://ijsr.org.ng/wp-content/uploads/2025/11/964771c3-d121-4fd9-8bd0-2bf5fd7bc01c_removalai_preview.png";
 
 const App = () => {
   const [receiptData, setReceiptData] = useState({
