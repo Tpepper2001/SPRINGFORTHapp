@@ -132,6 +132,8 @@ const App = () => {
       img.src = src;
     });
    };
+   
+  // 💡 START OF WATERMARK/CANVAS FIX 
   const generateReceiptImage = async () => {
     if (!receiptData.receivedFrom || !receiptData.amountNumbers) {
       alert('Please fill in required fields: Received From and Amount');
@@ -143,29 +145,39 @@ const App = () => {
     try {
       const canvas = document.createElement('canvas');
       const scale = 2;
-      canvas.width = 600 * scale;
-      canvas.height = 450 * scale;
+      const unscaledWidth = 600;
+      const unscaledHeight = 450;
+      
+      canvas.width = unscaledWidth * scale;
+      canvas.height = unscaledHeight * scale;
       const ctx = canvas.getContext('2d');
 
-      ctx.scale(scale, scale);
-
+      // 1. Draw solid background (using scaled dimensions)
       ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
+      ctx.fillRect(0, 0, canvas.width, canvas.height); 
 
+      // 2. Load the Logo
       const logo = await loadImage(logoUrl);
 
+      // 3. Draw Watermark (BEFORE SCALING THE CONTEXT)
       ctx.globalAlpha = 0.1;
-      const watermarkSize = 300;
-      const watermarkX = (canvas.width / scale - watermarkSize) / 2;
-      const watermarkY = (canvas.height / scale - watermarkSize) / 2;
+      const watermarkSize = 300 * scale; 
+      const watermarkX = (canvas.width - watermarkSize) / 2;
+      const watermarkY = (canvas.height - watermarkSize) / 2;
       ctx.drawImage(logo, watermarkX, watermarkY, watermarkSize, watermarkSize);
       ctx.globalAlpha = 1.0;
 
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width / scale, 0);
+      // 4. Scale the context for high-resolution drawing
+      // All subsequent coordinate values will be treated as UN-SCALED (0 to 600, 0 to 450)
+      ctx.scale(scale, scale);
+
+      // 5. Draw Header/Receipt details (using unscaled coordinates)
+      
+      const gradient = ctx.createLinearGradient(0, 0, unscaledWidth, 0);
       gradient.addColorStop(0, '#8B5A96');
       gradient.addColorStop(1, '#A569BD');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width / scale, 80);
+      ctx.fillRect(0, 0, unscaledWidth, 80);
 
       const logoSize = 50;
       ctx.drawImage(logo, 20, 15, logoSize, logoSize);
@@ -182,8 +194,8 @@ const App = () => {
 
       ctx.font = '12px Arial';
       ctx.textAlign = 'right';
-      ctx.fillText(`KD: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 25);
-      ctx.fillText(`No: ${receiptData.receiptNumber}`, canvas.width / scale - 20, 45);
+      ctx.fillText(`KD: ${receiptData.receiptNumber}`, unscaledWidth - 20, 25);
+      ctx.fillText(`No: ${receiptData.receiptNumber}`, unscaledWidth - 20, 45);
 
       ctx.fillStyle = '#8B5A96';
       ctx.fillRect(200, 90, 200, 30);
@@ -200,17 +212,19 @@ const App = () => {
       const lineHeight = 25;
       const leftMargin = 30;
       
+      // Date
       ctx.fillText('Date:', leftMargin, y);
       ctx.fillText(new Date(receiptData.date).toLocaleDateString('en-GB'), leftMargin + 50, y);
       
       y += lineHeight;
       
+      // Received From
       ctx.fillText('Received From:', leftMargin, y);
       ctx.strokeStyle = '#000';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(leftMargin + 120, y + 2);
-      ctx.lineTo(canvas.width / scale - 30, y + 2);
+      ctx.lineTo(unscaledWidth - 30, y + 2);
       ctx.stroke();
       if (receiptData.receivedFrom) {
         ctx.fillText(receiptData.receivedFrom, leftMargin + 125, y - 2);
@@ -218,10 +232,11 @@ const App = () => {
       
       y += lineHeight;
       
+      // Amount Numbers
       ctx.fillText('The Sum of:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 90, y + 2);
-      ctx.lineTo(canvas.width / scale - 30, y + 2);
+      ctx.lineTo(unscaledWidth - 30, y + 2);
       ctx.stroke();
       if (receiptData.amountNumbers) {
         const { naira, kobo } = formatAmount(receiptData.amountNumbers);
@@ -230,10 +245,11 @@ const App = () => {
       
       y += lineHeight;
       
+      // Balance Remaining
       ctx.fillText('Balance Remaining:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 120, y + 2);
-      ctx.lineTo(canvas.width / scale - 30, y + 2);
+      ctx.lineTo(unscaledWidth - 30, y + 2);
       ctx.stroke();
       if (receiptData.balanceRemaining) {
         const { naira, kobo } = formatAmount(receiptData.balanceRemaining);
@@ -242,10 +258,11 @@ const App = () => {
       
       y += lineHeight;
       
+      // Being
       ctx.fillText('Being:', leftMargin, y);
       ctx.beginPath();
       ctx.moveTo(leftMargin + 60, y + 2);
-      ctx.lineTo(canvas.width / scale - 30, y + 2);
+      ctx.lineTo(unscaledWidth - 30, y + 2);
       ctx.stroke();
       if (receiptData.paymentFor) {
         ctx.fillText(receiptData.paymentFor, leftMargin + 65, y - 2);
@@ -253,8 +270,9 @@ const App = () => {
       
       y += lineHeight * 2;
       
+      // Amount Words (Word Wrap Logic)
       const words = receiptData.amountWords;
-      const maxWidth = canvas.width / scale - 60;
+      const maxWidth = unscaledWidth - 60;
       const wordsLines = [];
       let currentLine = '';
       
@@ -275,7 +293,7 @@ const App = () => {
       wordsLines.forEach((line, index) => {
         ctx.beginPath();
         ctx.moveTo(leftMargin, y + 2);
-        ctx.lineTo(canvas.width / scale - 30, y + 2);
+        ctx.lineTo(unscaledWidth - 30, y + 2);
         ctx.stroke();
         ctx.fillText(line, leftMargin, y - 2);
         y += lineHeight;
@@ -283,6 +301,7 @@ const App = () => {
       
       y += 10;
       
+      // Draft/Cheque No
       if (receiptData.draftChequeNo) {
         ctx.fillText('Draft/Cheque No:', leftMargin, y);
         ctx.beginPath();
@@ -295,6 +314,7 @@ const App = () => {
         y += 10;
       }
       
+      // Footer
       ctx.font = 'bold 12px Arial';
       ctx.fillText('No Refund of Money after Payment', leftMargin, y);
       
@@ -306,11 +326,11 @@ const App = () => {
       
       ctx.textAlign = 'right';
       ctx.font = 'italic 14px Arial';
-      ctx.fillText('For Springforth Academy', canvas.width / scale - 30, y + 25);
+      ctx.fillText('For Springforth Academy', unscaledWidth - 30, y + 25);
       
       ctx.beginPath();
-      ctx.moveTo(canvas.width / scale - 200, y + 35);
-      ctx.lineTo(canvas.width / scale - 30, y + 35);
+      ctx.moveTo(unscaledWidth - 200, y + 35);
+      ctx.lineTo(unscaledWidth - 30, y + 35);
       ctx.stroke();
 
       const dataUrl = canvas.toDataURL('image/png', 1.0);
@@ -325,6 +345,7 @@ const App = () => {
       setIsGenerating(false);
     }
   };
+  // 💡 END OF WATERMARK/CANVAS FIX
 
   const viewReceipt = async () => {
     const imageUrl = generatedImageUrl || await generateReceiptImage();
